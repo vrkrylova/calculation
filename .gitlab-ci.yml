@@ -1,0 +1,41 @@
+stages: 
+  - stat
+  - secret
+  - doc_scan
+  - web_app_scan
+  - build_and_deploy
+
+
+stat: 
+  stage: stat
+  script:
+    - npm install -g eslint   
+    - eslint --init          
+    - eslint .         
+       
+secret:
+  stage: secret
+  script:
+    - trufflehog --path ~/Рабочий\ стол/dz/calc_docker
+
+  
+doc_scan: 
+  stage: doc_scan
+  script:
+    - trivy image --exit-code 0 --severity HIGH,CRITICAL calculate_doc:latest
+
+web_app_scan: 
+  stage: web_app_scan
+  script:
+    - zap-baseline.py -t http://127.0.0.1:5000/sum -r report.html
+    - zap-baseline.py -t http://127.0.0.1:5000/min -r report.html
+    - zap-baseline.py -t http://127.0.0.1:5000/multi -r report.html
+    - zap-baseline.py -t http://127.0.0.1:5000/del -r report.html
+
+build_and_deploy:
+  stage: build_and_deploy
+  script:
+    - docker build -t ghcr.io/vrkrylova/calculation:latest .
+    - docker stop calculation || true  
+    - docker rm calculation || true  
+    - docker run -d -p 5000:5000 --name calculation ghcr.io/vrkrylova/calculation:latest 
