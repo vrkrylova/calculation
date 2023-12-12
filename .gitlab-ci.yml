@@ -16,7 +16,7 @@ stat:
 secret:
   stage: secret
   script:
-    - trufflehog --path ~/Рабочий\ стол/dz/calc_docker
+    - trufflehog --path ~/Рабочий\ стол/veronika/calculate_doc
 
   
 doc_scan: 
